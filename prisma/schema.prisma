@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./app.db"
+}
+
+model User {
+  name     String  @unique
+  // 作者としてのユーザー
+  artistId String?
+  artist   Artist? @relation(fields: [artistId], references: [id])
+}
+
+model Work {
+  id             String           @id
+  title          String
+  visibility     String
+  viewCount      Int
+  rating         Int
+  WorkArtist     WorkArtist[]
+  folderName     String
+  WorkTag        WorkTag[]
+  WorkImage      WorkImage[]
+  WorkCharacters WorkCharacters[]
+}
+
+model Artist {
+  id         String       @id
+  name       String
+  WorkArtist WorkArtist[]
+  User       User[]
+  Characters Characters[]
+}
+
+model Characters {
+  id             String           @id
+  name           String
+  artistId       String?
+  artist         Artist?          @relation(fields: [artistId], references: [id])
+  WorkCharacters WorkCharacters[]
+}
+
+model Tag {
+  id      String    @id
+  name    String
+  sexual  String?
+  WorkTag WorkTag[]
+}
+
+model WorkArtist {
+  work     Work   @relation(fields: [workId], references: [id])
+  workId   String
+  artist   Artist @relation(fields: [artistId], references: [id])
+  artistId String
+
+  @@id(fields: [workId, artistId])
+}
+
+model WorkCharacters {
+  work         Work       @relation(fields: [workId], references: [id])
+  workId       String
+  character    Characters @relation(fields: [charactersId], references: [id])
+  charactersId String
+
+  @@id(fields: [workId, charactersId])
+}
+
+model WorkTag {
+  work   Work   @relation(fields: [workId], references: [id])
+  workId String
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String
+
+  @@id(fields: [workId, tagId])
+}
+
+model WorkImage {
+  work   Work   @relation(fields: [workId], references: [id])
+  workId String
+  index  Int
+  width  Int
+  height Int
+
+  @@id(fields: [workId, index])
+}
